@@ -21,6 +21,7 @@ public class demo {
 				kleurCard = akleurCard;
 				waardeCard = awaardeCard;
 				points = apoints;	
+				
 	}
 			
 			public void printCard() {
@@ -47,6 +48,8 @@ static void menu() {
 			int totalPoints = 0;
 			int draws = 0;
 			boolean stop = false; 
+			int pointsDealer =0;
+			int drawsDealer =0;
 				
 			for(int i=0; i< kleur.length; i++) {
 				for(int j=0; j<waarde.length; j++) {
@@ -87,6 +90,8 @@ static void menu() {
 				draws = 0;
 				Collections.shuffle(deck);
 				totalPoints = 0;
+				pointsDealer =0;
+				drawsDealer =0;
 				
 				System.out.println(" ");
 				Card newCard1 = deck.get(0);
@@ -134,19 +139,51 @@ static void menu() {
 					totalPoints =0;}
 				}
 				
+				drawsDealer= draws;
 				System.out.println("In total " + totalPoints + " points.");
+				System.out.println("");
+				System.out.println("The dealer has:");
 				
-				if (totalPoints>21) {
+				
+				
+				while (pointsDealer<17) {
+					Card cardDealer = deck.get(draws);
+					System.out.println(cardDealer.kleurCard + cardDealer.waardeCard);
+					pointsDealer= pointsDealer + cardDealer.points;
+					draws++;
+					
+					if(pointsDealer>21) {
+					for (int r=drawsDealer; r<draws; r++){
+						Card aas = deck.get(r);
+						if(aas.waardeCard == " Ace") {
+							pointsDealer= pointsDealer - 10; 
+						}
+					}
+				}
+				}
+				
+				
+				
+				System.out.println("The Dealer has " + pointsDealer + " points");
+				
+				if (totalPoints>21 ) {
 					System.out.println("You lose!");
-				}else if (totalPoints == 21) {
-					System.out.println("Congratualation, you win");
-				}else {
-					System.out.println("You have less then 21 points.");
+				}else if (totalPoints == 21 && pointsDealer == 21 ) {
+					System.out.println("stand-off");
+				}else if (pointsDealer>21 || pointsDealer<totalPoints) {
+					System.out.println("Congratulation, you win!.");
+				}else if(pointsDealer>totalPoints) {
+					System.out.println("You lose!");
+				}
+				else{
+					System.out.println("It is a draw.");
 				}
 				
 				draws = 0;
 				Collections.shuffle(deck);
 				totalPoints = 0;
+				pointsDealer =0;
+				drawsDealer = 0;
 				
 				break;
 			default:
