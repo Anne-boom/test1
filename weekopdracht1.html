@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    table {
+        overflow: hidden;
+        display: inline-block;
+        border: 2px solid black;
+        padding: 8px;
+    }
+
+    td {
+        border: 2px solid black;
+        padding: 14px;
+        position: relative;
+    }
+
+    td:hover {
+        background-color: yellow;
+    }
+
+    td:hover::after {
+        background-color: lightcoral;
+        content: '';
+        height: 10000px;
+        left: 0;
+        position: absolute;
+        top: -5000px;
+        width: 100%;
+        z-index: -1;
+    }
+</style>
+
+<body>
+    <div id="banner_div">
+      <h1>
+        4 op een rij
+      </h1>
+    </div>
+    <div id="table_div">
+      <table id="4op1rij">
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+    <div>
+      <h5>Player 1 wins: </h5>
+      <p id="player1_wins">1</p>
+      <h5>Player 2 wins: </h5>
+      <p id="player2_wins"></p>
+    </div>
+  </body>
+  <script>
+    let player1_wins = 0;
+    let player2_wins = 0;
+  
+    let wins = JSON.parse(localStorage.getItem('stand'));
+    if (wins != null) {
+      player1_wins = wins.player1;
+      player2_wins = wins.player2;
+  
+      let player1_wins_paragraph = document.getElementById('player1_wins');
+      let player2_wins_paragraph = document.getElementById('player2_wins');
+  
+      player1_wins_paragraph.innerHTML = player1_wins;
+      player2_wins_paragraph.innerHTML = player2_wins;  
+    }
+  
+    let stones = [0, 0, 0, 0, 0, 0, 0];
+    let table_clone = getTableClone();
+    let table = document.getElementById("4op1rij");
+    var player = true;
+  
+  
+    if (table != null) {
+      for (let i = 0; i < table.rows.length; i++) {
+        for (let j = 0; j < table.rows[i].cells.length; j++) {
+          table.rows[i].cells[j].addEventListener("click", hokKlik);
+        }
+      }
+    }
+  
+    function hokKlik() {
+      let col = window.event.target.cellIndex;
+      let color = 0;
+  
+      if (player) {
+        color = 1;
+        player = false;
+      } else {
+        color = 2;
+        player = true;
+      }
+  
+      if (stones[col] < 6) {
+        stones[col]++;
+        let row = 6 - stones[col]; //TODO: length rows
+        if (color == 1) {
+          table.rows[row].cells[col].style.backgroundColor = "red";
+          table_clone[row][col] = 1;
+        } else {
+          table.rows[row].cells[col].style.backgroundColor = "purple";
+          table_clone[row][col] = 2;
+        }
+      } else {
+        alert("This column is full!");
+        if (player) { //when player clicks it switches back to player when invalid click
+          player = false;
+        } else {
+          player = true;
+        }
+      }
+  
+      if (check_victory()) {
+        alert('player ' + color + ' has won!');
+  
+        if (color == 1) {
+          player1_wins++;
+        } else if (color == 2) {
+          player2_wins++;
+        }
+  
+        let saveWins = '{'+
+          '"player1": '+player1_wins+','+
+          '"player2": '+player2_wins+
+        '}';
+  
+        window.localStorage.setItem('stand', saveWins);
+        let wins = JSON.parse(localStorage.getItem('stand'));
+        
+        let player1_wins_paragraph = document.getElementById('player1_wins');
+        let player2_wins_paragraph = document.getElementById('player2_wins');
+  
+        player1_wins_paragraph.innerHTML = player1_wins;
+        player2_wins_paragraph.innerHTML = player2_wins;
+  
+  
+        
+  
+        for (let i = 0; i < table_clone.length; i++) {
+          for (let j = 0; j < table_clone[i].length; j++) {
+            if (table_clone[i][j] != 0) {
+              table.rows[i].cells[j].style.backgroundColor = "";
+            }
+          }
+        }
+  
+  
+        table_clone = getTableClone(); // reset clone table
+        stones = [0, 0, 0, 0, 0, 0, 0]; //reset stones after victory
+  
+  
+      }
+  
+      if (typeof (Storage) != "undefined") {
+        // Store, player(true false, tableclone,  player1 en player2)
+        const save = '{' +
+          '"tableSaveClone": ' + table_clone + ',' +
+          '"whichPlayer": ' + player +
+          '}'
+  
+        window.localStorage.setItem('step', JSON.stringify(save));
+  
+        // document.getElementById("result").innerHTML = localStorage.getItem("player1victories"); 
+      } else {
+        alert("No local storage")// Sorry! No Web Storage support..
+      }
+  
+    }
+  
+    function check_victory() {
+      for (let i = 0; i < table_clone.length; i++) {
+        if (check_row(i)) {
+          return true;
+        }
+      }
+  
+      for (let i = 0; i < table_clone[0].length; i++) {
+        if (check_col(i)) {
+          return true;
+        }
+      }
+  
+      return false;
+    }
+  
+    function check_row(row_number) {
+      for (let col_number = 0; col_number < 4; col_number++) {  // check every row in clone table
+        let cell_value = table_clone[row_number][col_number];
+        if (cell_value != 0) {  // if cell value is 0, then no player has claimed it, and no victory is possible.
+          let same_value = true;
+          let neighbour_number = 0;
+          do {  //  loop for each cell, when same value is still true and till number 4  
+            for (let neighbour = col_number + 1; neighbour < col_number + 4; neighbour++) {
+              if (table_clone[row_number][neighbour] != cell_value) {
+                same_value = false;
+              }
+            }
+            neighbour_number++;
+          }
+          while (same_value && neighbour_number < 4);
+          if (same_value) {
+            return true;
+            console.log('succes');
+          }
+        }
+      }
+      return false;
+    }
+    function check_col(col_number) {
+      for (let row_number = 0; row_number < 3; row_number++) {  // check every row in clone table
+        let cell_value = table_clone[row_number][col_number];
+        if (cell_value != 0) {  // if cell value is 0, then no player has claimed it, and no victory is possible.
+          let same_value = true;
+          let neighbour_number = 0;
+          do {  //  loop for each cell, when same value is still true and max 4 times
+            for (let neighbour = row_number + 1; neighbour < row_number + 4; neighbour++) {
+              if (table_clone[neighbour][col_number] != cell_value) {
+                same_value = false;
+              }
+            }
+            neighbour_number++;
+          }
+          while (same_value && neighbour_number < 4);
+          if (same_value) {
+            return true;
+            console.log('succes');
+          }
+        }
+      }
+      return false;
+    }
+    function getTableClone() {
+      return [
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0]
+      ];
+    }
+  </script>
+  
+  </html>
